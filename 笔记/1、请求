@@ -1,0 +1,16 @@
+import requests           
+url = "https://movie.douban.com/j/chart/top_list"
+
+dic1 = {
+    "type": "24",
+    "interval_id": "100:90",
+    "action": "",
+    "start": "20",
+    "limit": "20",
+}
+
+dic2 = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36 Edg/95.0.1020.44"}
+
+resp = requests.get(url = url, params=dic1, headers=dic2)
+print(resp.json())
+resp.close()
