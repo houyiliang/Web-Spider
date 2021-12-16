@@ -1,0 +1,45 @@
+import requests
+import time
+from tqdm import tqdm               #导入包显示下载进度，优雅永不过时
+from bs4 import BeautifulSoup
+
+#获取每章内容的函数
+def get_content(target):
+    header = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36 Edg/96.0.1054.53"
+    }
+    req = requests.get(url = target,headers=header)
+    #req.encoding = 'utf-8'
+    req.encoding = req.apparent_encoding                #处理乱码万能的方法
+    html = req.text
+    bf = BeautifulSoup(html , 'lxml')               #这一步不知道是做什么
+    texts = bf.find('div',id = 'content')           #从html中缩小范围di = content div的标签下
+    content = texts.text.strip().split('\xa0'*4) # strip 去掉\n  \t  \r什么的，split根据\xa0也就是空格切分数据
+    return content
+
+
+if __name__ == '__main__':
+    server = 'https://www.xinbiquge.org/'         #上一级目录的网址
+    book_name = '科技之锤.txt'
+    target = 'https://www.xinbiquge.org/xiaoshuo/sga4.html'      #小说目录的网址
+    header = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36 Edg/96.0.1054.53"
+    }
+    req = requests.get(url = target,headers=header)
+    req.encoding = req.apparent_encoding                #解码
+    html = req.text                         #转换成文本格式
+    chapters_bs = BeautifulSoup(html ,'html.parser')      #解析器 “lxml”只是其中一种，还有"html.parser"，["lxml","xml"]，"html5lib"各有不同的特点参考链接“https://blog.csdn.net/zhangzejia/article/details/79658221”
+    chapters = chapters_bs.find('div' , class_ = 'listmain')        #缩小范围,class是关键词要在后面加"_"  class_
+    chapters = chapters.find_all('a')        #提出所有带有<a>的标签
+    for chapter in tqdm(chapters):
+        chapter_name = chapter.string
+        url = server + chapter.get('href')         #拼接网址
+        content = get_content(url)              #获取每章的内容
+        with open(book_name , 'a' , encoding= 'utf-8') as f:    #把每章名字和内容写入文件
+            f.write(chapter_name)
+            f.write('\n')
+            f.write('\n'.join(content))
+            f.write('\n')
+
+
+
